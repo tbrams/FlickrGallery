@@ -3,9 +3,6 @@ package dk.brams.android.flickrgallery;
 import android.net.Uri;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,7 +10,6 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -71,8 +67,6 @@ public class FlickrFetchr {
             JSONObject jsonBody = new JSONObject(jsonString);
 
             parseItems(items, jsonBody);
-//            GSON Challenge - will have to look into this later
-//            parseItemsGson(items, jsonBody);
 
         } catch (IOException ioe) {
             Log.e(TAG, "failed to fetch json items" + ioe);
@@ -81,18 +75,6 @@ public class FlickrFetchr {
         }
 
         return items;
-    }
-
-
-    private void parseItemsGson(List<GalleryItem> items, JSONObject jsonBody) throws JSONException {
-        JSONObject photosJsonObject = jsonBody.getJSONObject("photos");
-        JSONArray photosJsonArray = photosJsonObject.getJSONArray("photo");
-
-
-        Gson gson = new Gson();
-        Type collectionType = new TypeToken<ArrayList<GalleryItem>>(){}.getType();
-        Log.d(TAG, "PhotoJsonString is now: " + photosJsonArray.toString());
-        items =  gson.fromJson(photosJsonArray.toString(), collectionType);
     }
 
 
