@@ -2,11 +2,13 @@ package dk.brams.android.flickrgallery;
 
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,7 @@ public class PhotoGalleryFragment extends Fragment{
 
     private RecyclerView mPhotoRecyclerView;
     private List<GalleryItem> mItems = new ArrayList<>();
+    private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
 
     public static PhotoGalleryFragment new_instance() {
         return new PhotoGalleryFragment();
@@ -31,7 +34,14 @@ public class PhotoGalleryFragment extends Fragment{
         setRetainInstance(true);
 
         new FetchItemsTask().execute();
+
+        mThumbnailDownloader = new ThumbnailDownloader<>();
+        mThumbnailDownloader.start();
+        mThumbnailDownloader.getLooper();
+        Log.i(TAG, "Background thread started");
     }
+
+
 
     @Nullable
     @Override
@@ -42,6 +52,15 @@ public class PhotoGalleryFragment extends Fragment{
 
         setupAdapter();
         return v;
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        mThumbnailDownloader.quit();
+        Log.i(TAG, "Background thread stopped");
     }
 
 
@@ -68,16 +87,15 @@ public class PhotoGalleryFragment extends Fragment{
 
     private class PhotoHolder extends RecyclerView.ViewHolder {
 
-        private ImageView mImageView;
+        private ImageView mItemImageView;
 
         public PhotoHolder(View itemView) {
             super(itemView);
-            mImageView = (ImageView) itemView.findViewById(R.id.fragment_photo_gallery_image_view);
+            mItemImageView = (ImageView) itemView.findViewById(R.id.fragment_photo_gallery_image_view);
         }
 
         public void bindDrawable(Drawable drawable) {
-            mImageView.setImageDrawable(drawable);
-
+            mItemImageView.setImageDrawable(drawable);
         }
     }
 
@@ -102,8 +120,24 @@ public class PhotoGalleryFragment extends Fragment{
         @Override
         public void onBindViewHolder(PhotoHolder holder, int position) {
             GalleryItem galleryItem = mGalleryItems.get(position);
-            Drawable placeHolder = getResources().getDrawable(R.drawable.bill_up_close);
+            Drawable placeHolder;
+
+            // Source: http://stackoverflow.com/a/29041466
+            //
+            // As of API 22, you should use the getDrawable(int, Theme) method instead of getDrawable(int),
+            // as it allows you to fetch a drawable object associated with a particular resource ID for the
+            // given screen density/theme. Calling the deprecated getDrawable(int) method is equivalent to
+            // calling getDrawable(int, null)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                placeHolder = getResources().getDrawable(R.drawable.bill_up_close, getActivity().getTheme());
+            } else {
+                placeHolder = getResources().getDrawable(R.drawable.bill_up_close);
+            }
+
             holder.bindDrawable(placeHolder);
+
+            mThumbnailDownloader.queueThumbnail(holder, galleryItem.getUrl());
         }
 
         @Override
