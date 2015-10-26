@@ -3,9 +3,8 @@ package dk.brams.android.flickrgallery;
 import android.net.Uri;
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,6 +13,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import dk.brams.android.flickrgallery.model.Flickr;
+import dk.brams.android.flickrgallery.model.Photo;
+
 
 public class FlickrFetchr {
     private static final String TAG = "FlickrFetchr";
@@ -61,42 +64,32 @@ public class FlickrFetchr {
                     .appendQueryParameter("nojsoncallback", "1")
                     .appendQueryParameter("extras", "url_s")
                     .build().toString();
+            Log.d(TAG, "Flickre URL is: " + url);
             String jsonString = getUrlString(url);
+
             Log.d(TAG, "received JSON: " + jsonString);
-
-            JSONObject jsonBody = new JSONObject(jsonString);
-
-            parseItems(items, jsonBody);
+            parseItemsGSON(items, jsonString);
 
         } catch (IOException ioe) {
             Log.e(TAG, "failed to fetch json items" + ioe);
-        } catch (JSONException jse) {
-            Log.e(TAG, "failed to parse json " + jse);
         }
 
         return items;
     }
 
 
+    private void parseItemsGSON(List<GalleryItem> items, String jsonString)  {
 
-    private void parseItems(List<GalleryItem> items, JSONObject jsonBody) throws JSONException {
-        JSONObject photosJsonObject = jsonBody.getJSONObject("photos");
-        JSONArray photosJsonArray = photosJsonObject.getJSONArray("photo");
-
-        for (int i = 0; i < photosJsonArray.length(); i++) {
-            JSONObject photoObject = photosJsonArray.getJSONObject(i);
+        Gson gson = new GsonBuilder().create();
+        Flickr f = gson.fromJson(jsonString, Flickr.class);
+        for (Photo p:f.photos.photo) {
             GalleryItem item = new GalleryItem();
-            item.setId(photoObject.getString("id"));
-            item.setCaption(photoObject.getString("title"));
-            if (!photoObject.has("url_s")) {
-                // ignore pictures with no thumbnail
-                continue;
-            }
-
-            item.setUrl(photoObject.getString("url_s"));
+            item.setId(p.id);
+            item.setCaption(p.title);
+            item.setUrl(p.url_s);
             items.add(item);
-
         }
+
     }
 
 }

@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -138,6 +137,7 @@ public class PhotoGalleryFragment extends Fragment{
         @Override
         public void onBindViewHolder(PhotoHolder holder, int position) {
             GalleryItem galleryItem = mGalleryItems.get(position);
+            /*
             Drawable placeHolder;
 
             // Source: http://stackoverflow.com/a/29041466
@@ -154,7 +154,7 @@ public class PhotoGalleryFragment extends Fragment{
             }
 
             holder.bindDrawable(placeHolder);
-
+*/
             mThumbnailDownloader.queueThumbnail(holder, galleryItem.getUrl());
         }
 
