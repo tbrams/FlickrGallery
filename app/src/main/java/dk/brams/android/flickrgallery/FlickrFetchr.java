@@ -87,7 +87,7 @@ public class FlickrFetchr {
     private List<GalleryItem> downloadGalleryItems(String url) {
         List<GalleryItem> items = new ArrayList<>();
         try {
-            Log.d(TAG, "Flickre URL is: " + url);
+            Log.d(TAG, "Flicker URL is: " + url);
             String jsonString = getUrlString(url);
 
             Log.d(TAG, "received JSON: " + jsonString);

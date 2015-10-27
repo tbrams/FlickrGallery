@@ -1,5 +1,6 @@
 package dk.brams.android.flickrgallery;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
@@ -20,7 +21,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +34,8 @@ public class PhotoGalleryFragment extends Fragment{
     private RecyclerView mPhotoRecyclerView;
     private List<GalleryItem> mItems = new ArrayList<>();
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
-
+    private MenuItem mSearchItem;
+    private ProgressBar mSpinner;
 
     public static PhotoGalleryFragment new_instance() {
         return new PhotoGalleryFragment();
@@ -64,8 +68,11 @@ public class PhotoGalleryFragment extends Fragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final int standardColumns=3;
+
         View v = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
+        // mSpinner = (ProgressBar) v.findViewById(R.id.spinner);
+
+        final int standardColumns=3;
         mPhotoRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_photo_gallery_recycler_view);
         mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), standardColumns));
         mPhotoRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -105,14 +112,18 @@ public class PhotoGalleryFragment extends Fragment{
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_photo_gallery, menu);
 
-        MenuItem searchItem=menu.findItem(R.id.menu_item_search);
-        final SearchView searchView = (SearchView) searchItem.getActionView();
+       mSearchItem=menu.findItem(R.id.menu_item_search);
+        final SearchView searchView = (SearchView) mSearchItem.getActionView();
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.d(TAG, "onQueryTextSubmit() called with: " + query);
-                QueryPreferences.setStoredQuery(getActivity(),query);
+                QueryPreferences.setStoredQuery(getActivity(), query);
+
+                // collapse the SearchView and the soft keyboard
+                collapseExtraViews();
+
                 updateItems();
                 return true;
             }
@@ -128,9 +139,23 @@ public class PhotoGalleryFragment extends Fragment{
             @Override
             public void onClick(View v) {
                 String query = QueryPreferences.getStoredQuery(getActivity());
-                searchView.setQuery(query,false);
+                searchView.setQuery(query, false);
             }
         });
+    }
+
+
+    private void collapseExtraViews() {
+
+        // Collapse the action view
+        mSearchItem.collapseActionView();
+
+        // collapse the soft keyboard
+        View v = getActivity().getCurrentFocus();
+        if (v!=null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(v.getWindowToken(),0);
+        }
     }
 
 
@@ -150,9 +175,18 @@ public class PhotoGalleryFragment extends Fragment{
     private void updateItems() {
         String query = QueryPreferences.getStoredQuery(getActivity());
 
+        if (mPhotoRecyclerView != null) {
+            mItems.clear();
+            mPhotoRecyclerView.getAdapter().notifyDataSetChanged();
+        }
+
         new FetchItemsTask(query).execute();
+        // toggleSpinner();
     }
 
+    public void toggleSpinner() {
+        mSpinner.setVisibility(mSpinner.getVisibility()==View.VISIBLE?View.GONE:View.VISIBLE);
+    }
 
     private void setupAdapter() {
         if (isAdded()) {
