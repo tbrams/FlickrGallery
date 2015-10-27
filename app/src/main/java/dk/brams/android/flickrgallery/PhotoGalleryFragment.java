@@ -1,6 +1,7 @@
 package dk.brams.android.flickrgallery;
 
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
@@ -57,10 +59,22 @@ public class PhotoGalleryFragment extends Fragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final int standardColumns=3;
         View v = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
         mPhotoRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_photo_gallery_recycler_view);
-        mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
-
+        mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), standardColumns));
+        mPhotoRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                Point size = new Point();
+                getActivity().getWindowManager().getDefaultDisplay().getSize(size);
+                int newColumns = (int) Math.floor(size.x*3/1440);
+                if (newColumns!=standardColumns) {
+                    GridLayoutManager layoutManager= (GridLayoutManager)mPhotoRecyclerView.getLayoutManager();
+                    layoutManager.setSpanCount(newColumns);
+                }
+            }
+        });
         setupAdapter();
         return v;
     }
