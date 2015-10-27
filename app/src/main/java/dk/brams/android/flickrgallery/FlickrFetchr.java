@@ -31,7 +31,6 @@ public class FlickrFetchr {
             .build();
 
 
-
     public byte[] getUrlBytes(String urlSpec) throws IOException {
 
         // create a new URL object from the string and prepare the HTTP connection interface

@@ -23,7 +23,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,6 @@ public class PhotoGalleryFragment extends Fragment{
     private List<GalleryItem> mItems = new ArrayList<>();
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
     private MenuItem mSearchItem;
-    private ProgressBar mSpinner;
 
     public static PhotoGalleryFragment new_instance() {
         return new PhotoGalleryFragment();
@@ -57,6 +55,7 @@ public class PhotoGalleryFragment extends Fragment{
             public void onThumbnailDownloaded(PhotoHolder target, Bitmap thumbnail) {
                 Drawable drawable = new BitmapDrawable(getResources(), thumbnail);
                 target.bindDrawable(drawable);
+//                toggleSpinnerOverlay();
             }
         });
         mThumbnailDownloader.start();
@@ -70,7 +69,6 @@ public class PhotoGalleryFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
-        // mSpinner = (ProgressBar) v.findViewById(R.id.spinner);
 
         final int standardColumns=3;
         mPhotoRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_photo_gallery_recycler_view);
@@ -181,12 +179,9 @@ public class PhotoGalleryFragment extends Fragment{
         }
 
         new FetchItemsTask(query).execute();
-        // toggleSpinner();
+
     }
 
-    public void toggleSpinner() {
-        mSpinner.setVisibility(mSpinner.getVisibility()==View.VISIBLE?View.GONE:View.VISIBLE);
-    }
 
     private void setupAdapter() {
         if (isAdded()) {
