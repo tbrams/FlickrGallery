@@ -33,14 +33,14 @@ public class ThumbnailDownloader<T> extends HandlerThread{
     }
 
 
-    public void queueThumbnail(T target, String url) {
+    public void queueThumbnail(T targetUIObject, String url) {
         Log.d(TAG, "Got a URL:" + url);
 
         if (url == null) {
-            mRequestMap.remove(target);
+            mRequestMap.remove(targetUIObject);
         } else {
-            mRequestMap.put(target, url);
-            mRequestHandler.obtainMessage(MESSAGE_DOWNLOAD, target).sendToTarget();
+            mRequestMap.put(targetUIObject, url);
+            mRequestHandler.obtainMessage(MESSAGE_DOWNLOAD, targetUIObject).sendToTarget();
         }
     }
 
