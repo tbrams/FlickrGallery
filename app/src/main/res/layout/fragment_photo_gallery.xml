@@ -16,7 +16,7 @@
         android:layout_height="match_parent"
         android:alpha="0.4"
         android:background="@android:color/black"
-        android:visibility="visible">
+        android:visibility="invisible">
 
         <ProgressBar
             style="?android:attr/progressBarStyleLarge"

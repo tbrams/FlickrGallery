@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class PhotoGalleryFragment extends Fragment{
     private List<GalleryItem> mItems = new ArrayList<>();
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
     private MenuItem mSearchItem;
+    private FrameLayout mSpinnerOverlay;
 
     public static PhotoGalleryFragment new_instance() {
         return new PhotoGalleryFragment();
@@ -69,6 +71,7 @@ public class PhotoGalleryFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
+        mSpinnerOverlay = (FrameLayout) v.findViewById(R.id.spinner_overlay);
 
         final int standardColumns=3;
         mPhotoRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_photo_gallery_recycler_view);
@@ -171,13 +174,16 @@ public class PhotoGalleryFragment extends Fragment{
     }
 
     private void updateItems() {
-        String query = QueryPreferences.getStoredQuery(getActivity());
 
         if (mPhotoRecyclerView != null) {
             mItems.clear();
             mPhotoRecyclerView.getAdapter().notifyDataSetChanged();
         }
 
+        if (mSpinnerOverlay!=null) {
+            mSpinnerOverlay.setVisibility(View.VISIBLE);
+        }
+        String query = QueryPreferences.getStoredQuery(getActivity());
         new FetchItemsTask(query).execute();
 
     }
@@ -210,6 +216,7 @@ public class PhotoGalleryFragment extends Fragment{
         @Override
         protected void onPostExecute(List<GalleryItem> galleryItems) {
             mItems = galleryItems;
+            mSpinnerOverlay.setVisibility(View.GONE);
             setupAdapter();
         }
     }
