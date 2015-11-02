@@ -49,13 +49,6 @@ public class PhotoGalleryFragment extends Fragment{
 
         updateItems();
 
-        // Create and start the PollService
-//        Intent i = PollService.newIntent(getActivity());
-//        getActivity().startService(i);
-
-//        PollService.setServiceAlarm(getActivity(),true);
-
-
         Handler responseHandler = new Handler();
         mThumbnailDownloader = new ThumbnailDownloader<>(responseHandler);
 
@@ -64,7 +57,6 @@ public class PhotoGalleryFragment extends Fragment{
             public void onThumbnailDownloaded(PhotoHolder target, Bitmap thumbnail) {
                 Drawable drawable = new BitmapDrawable(getResources(), thumbnail);
                 target.bindDrawable(drawable);
-//                toggleSpinnerOverlay();
             }
         });
         mThumbnailDownloader.start();
