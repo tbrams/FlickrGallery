@@ -1,6 +1,7 @@
 package dk.brams.android.flickrgallery;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
@@ -214,6 +215,7 @@ public class PhotoGalleryFragment extends VisibleFragment {
     }
 
 
+
     private class FetchItemsTask extends AsyncTask<Void, Void, List<GalleryItem>> {
 
         private String mQuery;
@@ -239,14 +241,28 @@ public class PhotoGalleryFragment extends VisibleFragment {
         }
     }
 
-    private class PhotoHolder extends RecyclerView.ViewHolder {
+    private class PhotoHolder extends RecyclerView.ViewHolder
+     implements  View.OnClickListener {
 
         private ImageView mItemImageView;
+        private GalleryItem mGalleryItem;
+
 
         public PhotoHolder(View itemView) {
             super(itemView);
             mItemImageView = (ImageView) itemView.findViewById(R.id.fragment_photo_gallery_image_view);
+            itemView.setOnClickListener(this);
         }
+        public void bindGalleryItem(GalleryItem galleryItem) {
+            mGalleryItem = galleryItem;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Intent i = new Intent(Intent.ACTION_VIEW, mGalleryItem.getPhotoPageUri());
+            startActivity(i);
+        }
+
 
         public void bindDrawable(Drawable drawable) {
             mItemImageView.setImageDrawable(drawable);
@@ -274,6 +290,8 @@ public class PhotoGalleryFragment extends VisibleFragment {
         @Override
         public void onBindViewHolder(PhotoHolder holder, int position) {
             GalleryItem galleryItem = mGalleryItems.get(position);
+            holder.bindGalleryItem(galleryItem);
+
             /*
             Drawable placeHolder;
 
