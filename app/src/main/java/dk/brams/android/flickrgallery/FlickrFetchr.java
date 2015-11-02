@@ -109,6 +109,7 @@ public class FlickrFetchr {
             item.setId(p.id);
             item.setCaption(p.title);
             item.setUrl(p.url_s);
+            item.setOwner(p.owner);
             items.add(item);
         }
 

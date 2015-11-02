@@ -1,9 +1,20 @@
 package dk.brams.android.flickrgallery;
 
+import android.net.Uri;
+
 public class GalleryItem {
     private String mCaption;
     private String mId;
     private String mUrl;
+    private String mOwner;
+
+    public String getOwner() {
+        return mOwner;
+    }
+
+    public void setOwner(String owner) {
+        mOwner = owner;
+    }
 
     public String getCaption() {
         return mCaption;
@@ -33,5 +44,13 @@ public class GalleryItem {
     public String toString() {
         return mCaption;
 
+    }
+
+    public Uri getPhotoPageUri() {
+        return Uri.parse("hppt://www.flickr.com/photos/")
+                .buildUpon()
+                .appendPath(mOwner)
+                .appendPath(mId)
+                .build();
     }
 }
