@@ -11,13 +11,13 @@ import android.net.ConnectivityManager;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
-import android.util.Log;
 
 import java.util.List;
 
 public class PollService extends IntentService {
     private static final String TAG = "PollService";
     private static final int POLL_INTERVAL = 1000*60; // 60 seconds
+    public static final String ACTION_SHOW_NOTIFICATION = "dk.brams.android.flickrgallery.SHOW_NOTIFICATION";
 
     public static Intent newIntent(Context context) {
         return new Intent(context, PollService.class);
@@ -29,6 +29,7 @@ public class PollService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+
         if (!isNetworkAvailableAndConnected())
             return;
 
@@ -48,11 +49,11 @@ public class PollService extends IntentService {
 
         // if there are results, check if they are different now
         String resultId = items.get(0).getId();
-        if (resultId.equals(lastId)) {
-            Log.d(TAG, "Got an old result");
-        } else {
-            Log.d(TAG, "Got a new result");
 
+        // Update the last ID in preferences
+        QueryPreferences.setLastResultId(this, resultId);
+
+        if (!resultId.equals(lastId)) {
             Resources resources = getResources();
             Intent i = PhotoGalleryActivity.newIntent(this);
             PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
@@ -66,12 +67,17 @@ public class PollService extends IntentService {
                     .build();
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
             notificationManager.notify(0, notification);
+
+            sendBroadcast(new Intent(ACTION_SHOW_NOTIFICATION));
         }
 
-        // Update the last ID in preferences
-        QueryPreferences.setLastResultId(this, resultId);
+    }
+
+
+    public static void createNotification() {
 
     }
+
 
     private boolean isNetworkAvailableAndConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
@@ -93,6 +99,8 @@ public class PollService extends IntentService {
             alarmManager.cancel(pi);
             pi.cancel();
         }
+
+        QueryPreferences.setAlarmOn(context, isOn);
     }
 
     public static boolean isServiceAlarmOn(Context context) {
